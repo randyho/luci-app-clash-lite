@@ -1,0 +1,72 @@
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_CN\n"
+
+msgid "Clash"
+msgstr "Clash"
+
+msgid "A Clash Client For OpenWrt"
+msgstr "一个运行在 OpenWrt 上的 Clash 客户端，根据灵活的规则配置实现策略代理"
+
+msgid "Status"
+msgstr "运行状态"
+
+msgid "Running"
+msgstr "运行中"
+
+msgid "Not Running"
+msgstr "未运行"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Enable"
+msgstr "启用"
+
+msgid "Disable"
+msgstr "停用"
+
+msgid "Proxy Mode"
+msgstr "代理模式"
+
+msgid "Select Proxy Mode"
+msgstr "选择默认代理模式"
+
+msgid "Log Level"
+msgstr "日志等级"
+
+msgid "Info Mode"
+msgstr "Info【信息】"
+
+msgid "Warning Mode"
+msgstr "Warning【警告】"
+
+msgid "Error Mode"
+msgstr "Error【错误】"
+
+msgid "Debug Mode"
+msgstr "Debug【调试】"
+
+msgid "Silent Mode"
+msgstr "Silent【静默】"
+
+msgid "General Settings"
+msgstr "常规设置"
+
+msgid "Advanced Setting"
+msgstr "高级设置"
+
+msgid "Redir Port"
+msgstr "流量转发端口"
+
+msgid "TProxy Port"
+msgstr "TProxy 端口"
+
+msgid "SOCKS5 Port"
+msgstr "SOCKS5 代理端口"
+
+msgid "HTTP(S) Port"
+msgstr "HTTP(S) 代理端口"
+
+msgid "Mixed Port"
+msgstr "HTTP(S)&SOCKS5 混合代理端口"
