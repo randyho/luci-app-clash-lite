@@ -44,12 +44,6 @@ define Package/$(PKG_NAME)/description
     A LuCI support for clash
 endef
 
-define Package/$(PKG_NAME)/config
-	menu "Clash Counfiguration"
-		depends on PACKAGE_$(PKG_NAME)
-	endmenu
-endef
-
 define Package/$(PKG_NAME)/conffiles
 /etc/clash/profiles/
 /etc/config/clash
