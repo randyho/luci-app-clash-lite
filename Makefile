@@ -48,9 +48,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config/
 	$(INSTALL_CONF) $(CURDIR)/root/etc/config/clash $(1)/etc/config/clash
 
-	$(INSTALL_DIR) $(1)/etc/clash/
-	$(INSTALL_DATA) $(DL_DIR)/$(COUNTRY_MMDB_FILE) $(1)/etc/clash/Country.mmdb
-
 	$(INSTALL_DIR) $(1)/usr/share/clash/
 	$(INSTALL_BIN) $(CURDIR)/root/usr/share/clash/build_conf.lua $(1)/usr/share/clash/build_conf.lua
 	$(INSTALL_BIN) $(CURDIR)/root/usr/share/clash/create_rules.sh $(1)/usr/share/clash/create_rules.sh
