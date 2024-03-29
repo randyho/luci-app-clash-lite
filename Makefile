@@ -47,11 +47,6 @@ endef
 define Package/$(PKG_NAME)/config
 	menu "Clash Counfiguration"
 		depends on PACKAGE_$(PKG_NAME)
-
-	config PACKAGE_CLASH_INCLUDE_COUNTRY_MMDB
-		bool "Include Country.mmdb"
-		default y
-
 	endmenu
 endef
 
