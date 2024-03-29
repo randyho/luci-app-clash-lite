@@ -64,8 +64,7 @@ define Package/clash-dashboard/description
 	Web Dashboard for Clash
 endef
 
-
-COUNTRY_MMDB_VER=20240312
+COUNTRY_MMDB_VER=20230612
 COUNTRY_MMDB_FILE:=Country.$(COUNTRY_MMDB_VER).mmdb
 
 define Download/country_mmdb
