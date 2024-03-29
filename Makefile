@@ -35,8 +35,8 @@ define Package/$(PKG_NAME)
 	SUBMENU:=3. Applications
 	TITLE:=LuCI Support for Clash
 	PKGARCH:=all
-	DEPENDS:=+dnsmasq-full +coreutils +coreutils-nohup +bash +curl +ca-certificates +ipset +ip-full \
-	+iptables +iptables-mod-tproxy +libcap +libcap-bin +libuci-lua +libyaml +kmod-tun +unzip
+	DEPENDS:=+dnsmasq-full +coreutils +coreutils-nohup +bash +curl +ca-bundle +ipset +ip-full \
+	+iptables +iptables-mod-tproxy +libcap +libcap-bin +libuci-lua +lyaml +kmod-tun +unzip
 	MAINTAINER:=Randy
 endef
 
