@@ -20,6 +20,7 @@ config clash 'global'
 	list nameserver '114.114.114.114'
 	option trigger_delay '10'
 	option ipv6 '0'
+    option core_arch '0'
 
 config profile 'Example'
 	option type 'Static'

@@ -1,0 +1,47 @@
+#!/bin/bash
+. /lib/functions.sh
+
+mkdir -p /etc/clash/core
+mkdir -p /etc/clash/config
+mkdir -p /etc/clash/proxy_provider
+mkdir -p /etc/clash/rule_provider
+
+#Set Core Model
+source "/etc/openwrt_release"
+case "${DISTRIB_ARCH}" in
+	aarch64_*)
+		CORE_ARCH="linux-arm64"
+		;;
+	arm_*_neon-vfp*)
+		CORE_ARCH="linux-armv7"
+		;;
+	arm_*_neon|arm_*_vfp*)
+		CORE_ARCH="linux-armv6"
+		;;
+	arm*)
+		CORE_ARCH="linux-armv5"
+		;;
+	i386_*)
+		CORE_ARCH="linux-386"
+		;;
+	mips64_*)
+		CORE_ARCH="linux-mips64"
+		;;
+	mips_*)
+		CORE_ARCH="linux-mips-softfloat"
+		;;
+	mipsel_*)
+		CORE_ARCH="linux-mipsle-softfloat"
+		;;
+	x86_64)
+		CORE_ARCH="linux-amd64"
+		;;
+	*)
+		CORE_ARCH="0"
+		;;
+esac
+uci -q set clash.config.core_arch="${CORE_ARCH}"
+
+uci -q commit clash
+
+exit 0
