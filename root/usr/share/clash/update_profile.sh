@@ -1,37 +1,65 @@
-#/bin/sh
+#!/bin/sh
 
-# REQUIRE CURL
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
 
-profile=$1
-CONF="clash"
-CURL="curl"
+readonly config_path="/etc/clash/config"
+readonly tmp_path="/tmp/clash_profile.tmp"
 
-msg() {
-	logger -p daemon.info -st "$CONF[$$]" "$*"
-}
+case "$1" in
+"list")
+	json_init
+	json_add_object "avail"
+	json_close_object
+	json_add_object "remove"
+		json_add_string "filename" "filename"
+	json_close_object
+	json_add_object "rename"
+		json_add_string "newname" "filename"
+	json_close_object
+	json_dump
+	json_cleanup
+	;;
+"call")
+	case "$2" in
+	"avail")
+		json_init
+		json_add_int "avail" "$(df | grep -E '/$' | awk '{print $4}')"
+		json_dump
+		json_cleanup
+		;;
+	"remove")
+		read -r input
+		json_load "$input"
+		json_get_var filename "filename"
+		json_cleanup
 
-(opkg list-installed | grep "curl" >/dev/null) || { msg "Update profile from url require cURL with SSL support."; return 1;}
-[ -z "$profile" ] && { msg "Missing profile name."; return 1;}
+		if dirname "$filename" | grep -q ".."; then
+			echo '{ "result": 255 }'
+			exit 255
+		fi
 
-. "/lib/functions.sh"
+		rm -f "$config_path/$filename"
+		echo '{ "result": 0 }'
+		;;
+	"rename")
+		read -r input
+		json_load "$input"
+		json_get_var newname "newname"
+		json_cleanup
 
-config_load "$CONF"
+		if dirname "$newname" | grep -q ".."; then
+			echo '{ "result": 255 }'
+			exit 255
+		fi
 
-config_get type "$profile" "type"
-
-[ "$type" == "Static" ] && { msg "Static type profile can't be updated."; return 1;}
-
-config_get url "$profile" "url"
-
-$CURL -sL \
-    -o "/etc/clash/profiles/$profile.yaml" \
-    $url
-
-if [ "$?" != 0 ]; then
-    msg "Update profile $profile failed, url gave an unexpected response."
-    return 1
-fi
-
-msg "Update profile $profile finished."
-
-return 0
+		if mv "$tmp_path" "$config_path/$newname" 2>"/dev/null"; then
+			chmod 0644 "$config_path/$newname"
+			echo '{ "result": 0 }'
+		else
+			echo '{ "result": 1 }'
+		fi
+		;;
+	esac
+	;;
+esac

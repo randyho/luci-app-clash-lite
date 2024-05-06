@@ -1,99 +1,83 @@
-#!/usr/bin/env lua
+#!/bin/sh
 
-local json = require "luci.jsonc"
-local sys = require "luci.sys"
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
 
-local update_profile_script = "/usr/lib/clash/update_profile.sh"
+readonly core_path="/etc/clash/clash"
+readonly config_path="/etc/clash/config/"
+readonly tmp_path="/tmp/clash_profile.tmp"
 
-local methods = {
-    get_service_status = {
-        call = function()
-            local res = {}
-            res["enabled"] = sys.call("pidof clash >/dev/null") == 0
-            res["version"] = sys.exec("clash -v")
-            res["dashboard"] = sys.call('opkg list-installed | grep "clash-dashboard" >/dev/null') == 0
-            return res
-        end
-    },
-    update_profile = {
-        args = {profile_name = "profile_name"},
-        call = function(args)
-            local res = {}
-            if not args or not args.profile_name then
-                res["success"] = false
-                res["message"] = "Require profile name"
-                return res
-            end
-            local profile_name = args.profile_name
-            if sys.call(update_profile_script .. " " .. profile_name) == 0 then
-                res["success"] = true
-                res["message"] = "Update profile " .. profile_name .. " finished"
-                return res
-            end
-            res["success"] = false
-            res["message"] = "Update profile " .. profile_name .. " failed"
-            return res
-        end
-    }
-}
 
-local function parseInput()
-    local parse = json.new()
-    local done, err
+case "$1" in
+"list")
+    json_init
+    json_add_object "avail"
+    json_close_object
+    json_add_object "remove"
+    json_add_string "filename" "filename"
+    json_close_object
+    json_add_object "rename"
+    json_add_string "newname" "filename"
+    json_close_object
+    json_dump
+    json_cleanup
+    ;;
+"call")
+    case "$2" in
+    "avail")
+        json_init
+        json_add_int "avail" "$(df | grep -E '/$' | awk '{print $4}')"
+        json_dump
+        json_cleanup
+        ;;
+    "remove")
+        read -r input
+        json_load "$input"
+        json_get_var filename "filename"
+        json_cleanup
 
-    while true do
-        local chunk = io.read(4096)
-        if not chunk then
-            break
-        elseif not done and not err then
-            done, err = parse:parse(chunk)
-        end
-    end
+        if dirname "$filename" | grep -q ".."; then
+            echo '{ "result": 255 }'
+            exit 255
+        fi
 
-    if not done then
-        print(json.stringify({error = err or "Incomplete input"}))
-        os.exit(1)
-    end
+        rm -f "$config_path/$filename"
+        echo '{ "result": 0 }'
+        ;;
+    "rename")
+        read -r input
+        json_load "$input"
+        json_get_var newname "newname"
+        json_cleanup
 
-    return parse:get()
-end
+        if dirname "$newname" | grep -q ".."; then
+            echo '{ "result": 255 }'
+            exit 255
+        fi
 
-local function validateArgs(func, uargs)
-    local method = methods[func]
-    if not method then
-        print(json.stringify({error = "Method not found"}))
-        os.exit(1)
-    end
-
-    if type(uargs) ~= "table" then
-        print(json.stringify({error = "Invalid arguments"}))
-        os.exit(1)
-    end
-
-    uargs.ubus_rpc_session = nil
-
-    local k, v
-    local margs = method.args or {}
-    for k, v in pairs(uargs) do
-        if margs[k] == nil or (v ~= nil and type(v) ~= type(margs[k])) then
-            print(json.stringify({error = "Invalid arguments"}))
-            os.exit(1)
-        end
-    end
-
-    return method
-end
-
-if arg[1] == "list" then
-    local _, method, rv = nil, nil, {}
-    for _, method in pairs(methods) do
-        rv[_] = method.args or {}
-    end
-    print((json.stringify(rv):gsub(":%[%]", ":{}")))
-elseif arg[1] == "call" then
-    local args = parseInput()
-    local method = validateArgs(arg[2], args)
-    local result, code = method.call(args)
-    print((json.stringify(result):gsub("^%[%]$", "{}")))
-    os.exit(code or 0)
-end
+        if mv "$tmp_path" "$config_path/$newname" 2>"/dev/null"; then
+            chmod 0644 "$config_path/$newname"
+            echo '{ "result": 0 }'
+        else
+            echo '{ "result": 1 }'
+        fi
+        ;;
+    "get_status")
+        pid=$(pidof clash)
+        if [ -n "$pid" ]; then
+            echo '{ "result": 1 }'
+        else
+            echo '{ "result": 0 }'
+        fi
+        ;;
+    "get_version")
+        ver=$($core_path -v | awk 'NR==1{print $3}')
+        #echo '{ "result":' $ver '}'
+        json_init
+        json_add_string "version" "$ver"
+        json_dump
+        json_cleanup
+        ;;
+    esac
+    ;;
+esac

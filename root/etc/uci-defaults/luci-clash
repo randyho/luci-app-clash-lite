@@ -40,8 +40,9 @@ case "${DISTRIB_ARCH}" in
 		CORE_ARCH="0"
 		;;
 esac
-uci -q set clash.config.core_arch="${CORE_ARCH}"
 
-uci -q commit clash
+uci -q set "clash.@global[0].core_arch="${CORE_ARCH}"
+
+uci -q commit "clash"
 
 exit 0

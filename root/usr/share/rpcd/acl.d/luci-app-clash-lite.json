@@ -1,22 +1,22 @@
 {
-  "luci-app-simple-clash": {
-    "description": "Grant UCI access for clash",
+  "luci-app-clash-lite": {
+    "description": "Grant UCI access for luci-app-clash-lite",
     "read": {
-      "ubus": {
-        "luci.clash": ["get_service_status", "update_profile"],
-        "luci": ["setInitAction"]
-      },
-      "uci": ["clash"],
       "file": {
-        "/etc/clash/profiles/*": ["read"],
+        "/etc/clash/config/*": [ "list" ],
         "/sbin/logread": ["exec"]
-      }
+      },
+      "ubus": {
+        "luci.clash": [ "avail", "remove", "rename", "get_status", "get_version"]
+      },
+      "uci": [ "clash" ]
     },
     "write": {
-      "uci": ["clash"],
       "file": {
-        "/etc/clash/profiles/*": ["write"]
-      }
+        "/tmp/clash_profile.tmp": [ "write" ],
+        "/etc/clash/config/*": ["write"]
+      },
+      "uci": [ "clash" ]
     }
   }
 }
