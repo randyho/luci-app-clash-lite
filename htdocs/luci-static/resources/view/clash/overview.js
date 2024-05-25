@@ -10,13 +10,13 @@
 var callGetStatus = rpc.declare({
   object: "luci.clash",
   method: "get_status",
-  expect: {'': {}},
+  expect: {  }
 });
 
 var callGetVersion = rpc.declare({
   object: "luci.clash",
   method: "get_version",
-  expect: {'': {}},
+  expect: {  }
 });
 
 var callRemoveArgon = rpc.declare({
@@ -35,6 +35,7 @@ var callRemoveArgon = rpc.declare({
 // };
 
 function renderStatus(isRunning, port) {
+  console.log(isRunning)
   var spanTemp = '<span style="color:%s"><strong>%s %s</strong></span>';
   var renderHTML;
   if (isRunning) {
@@ -54,7 +55,7 @@ return view.extend({
   load: function () {
     return Promise.all([
       uci.load('clash'),
-      L.resolveDefault(callGetVersion(), {}),
+      L.resolveDefault(callGetStatus(), {}),
       L.resolveDefault(fs.list(config_path), {})
     ]);
   },
@@ -76,7 +77,7 @@ return view.extend({
     s.anonymous = true;
     s.render = function () {
         poll.add(function () {
-        return L.resolveDefault(callGetStatus()).then(function (res) {
+        return L.resolveDefault(callGetStatus(), {}).then(function (res) {
             var view = document.getElementById('service_status');
             view.innerHTML = renderStatus(res, 9090);
         });
