@@ -7,25 +7,6 @@
 "require rpc";
 "require fs";
 
-var callGetStatus = rpc.declare({
-  object: "luci.clash",
-  method: "get_status",
-  expect: {  }
-});
-
-var callGetVersion = rpc.declare({
-  object: "luci.clash",
-  method: "get_version",
-  expect: {  }
-});
-
-var callRemoveArgon = rpc.declare({
-  object: 'luci.clash',
-  method: 'remove',
-  params: ['filename'],
-  expect: { '': {} }
-});
-
 
 // var handleOpenDashboard: function () {
 //   var path = "clash-dashboard";
@@ -52,10 +33,30 @@ function renderStatus(isRunning, port) {
 var config_path = '/etc/clash/config/';
 
 return view.extend({
+  callGetStatus: rpc.declare({
+    object: "luci.clash",
+    method: "get_status",
+    expect: { }
+  }),
+  
+  callGetVersion: rpc.declare({
+    object: "luci.clash",
+    method: "get_version",
+    expect: { }
+  }),
+  
+  callRemoveArgon: rpc.declare({
+    object: 'luci.clash',
+    method: 'remove',
+    params: ['filename'],
+    expect: { '': {} }
+  }),
+
   load: function () {
     return Promise.all([
       uci.load('clash'),
-      L.resolveDefault(callGetStatus(), {}),
+      L.resolveDefault(this.callGetStatus(), {}),
+      L.resolveDefault(this.callGetVersion(), {}),
       L.resolveDefault(fs.list(config_path), {})
     ]);
   },
@@ -63,7 +64,9 @@ return view.extend({
   render: function (data) {
     var _this = this;
     console.log(data)
-    var version = data[1];
+    var runStatus = data[1];
+    var clashVersion = data[2];
+    var configList = data[3];
     var m, s, o;
 
     m = new form.Map(
@@ -77,7 +80,7 @@ return view.extend({
     s.anonymous = true;
     s.render = function () {
         poll.add(function () {
-        return L.resolveDefault(callGetStatus(), {}).then(function (res) {
+        return L.resolveDefault(runStatus, {}).then(function (res) {
             var view = document.getElementById('service_status');
             view.innerHTML = renderStatus(res, 9090);
         });
@@ -133,7 +136,7 @@ return view.extend({
 
     o = s.option(form.DummyValue, "_version", _("Version"));
     o.cfgvalue = function () {
-      return _(version);
+      return _(clashVersion);
     };
 
     o = s.option(form.Button, '_update_core', _('Update Core'));
@@ -225,7 +228,7 @@ return view.extend({
         ])
       );
 
-      cbi_update_table(tbl, data[2].map(L.bind(function(file) {
+      cbi_update_table(tbl, configList.map(L.bind(function(file) {
         return [
           file.name,
           new Date(file.mtime * 1000).toLocaleString(),
